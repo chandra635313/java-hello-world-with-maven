@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y wget git
 # Clone application source
 # --------------------------------------------------
 WORKDIR /opt
-RUN git clone https://github.com/chandra635313/java-hello-world-with-maven.git
+RUN git clone https://github.com/chandra635313/java-hello-world-with-maven.git 
 
 # --------------------------------------------------
 # Build WAR file
