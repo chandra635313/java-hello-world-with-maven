@@ -39,7 +39,7 @@ jobs:
       run: |
         trivy image \
           --severity HIGH,CRITICAL \
-          --exit-code 0 \
+          --exit-code 1 \
           java-tomcat-app:latest 
 
     # 6️⃣ Run Docker Container (ONLY if scan passes)
