@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - Dev
 
 jobs:
   build-and-scan:
