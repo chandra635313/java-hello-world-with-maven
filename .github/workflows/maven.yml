@@ -48,4 +48,4 @@ jobs:
         docker run -d \
           --name java-tomcat-container \
           -p 8080:8080 \
-          java-tomcat-app:latest
+          java-tomcat-app:latest 
