@@ -1,0 +1,59 @@
+name: DevSecOps - Local Sonar + Snyk
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Checkout Code
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # 2️⃣ Install Java (for Sonar Scanner)
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    # 3️⃣ Start SonarQube in Docker
+    - name: Start SonarQube
+      run: |
+        docker run -d --name sonarqube \
+        -p 9000:9000 sonarqube:lts
+        sleep 60
+
+    # 4️⃣ Install Sonar Scanner CLI
+    - name: Install Sonar Scanner
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unzip
+        wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+        unzip sonar-scanner-cli-*.zip
+        echo "$PWD/sonar-scanner-*/bin" >> $GITHUB_PATH
+
+    # 5️⃣ Run Sonar SAST Scan
+    - name: Run SonarQube Scan
+      run: |
+        sonar-scanner \
+        -Dsonar.projectKey=my-project \
+        -Dsonar.sources=. \
+        -Dsonar.host.url=http://localhost:9000 \
+        -Dsonar.login=admin \
+        -Dsonar.password=admin
+
+    # 6️⃣ Install Snyk
+    - name: Install Snyk
+      run: npm install -g snyk
+
+    # 7️⃣ Authenticate Snyk
+    - name: Authenticate Snyk
+      run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+    # 8️⃣ Run SCA Scan
+    - name: Run Snyk SCA Scan
+      run: snyk test --severity-threshold=high
