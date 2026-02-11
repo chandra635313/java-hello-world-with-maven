@@ -2,7 +2,7 @@ name: CI-CD with Security
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "Dev" ]
 
 jobs:
 
