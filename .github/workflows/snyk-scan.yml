@@ -1,4 +1,4 @@
-name: Snyk Security Scan
+name: Snyk Java + Docker Scan
 
 on:
   push:
@@ -8,29 +8,42 @@ on:
   pull_request:
 
 jobs:
-  snyk-security:
+  snyk-scan:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          node-version: 18
+          distribution: temurin
+          java-version: 17
 
-      - name: Install dependencies
-        run: npm install
+      - name: Build Java app
+        run: mvn clean install -DskipTests
 
-      - name: Install Snyk CLI
-        run: npm install -g snyk
+      - name: Snyk Open Source scan
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
 
-      - name: Authenticate Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+      - name: Build Docker image
+        run: docker build -t my-java-app .
 
-      - name: Run Snyk Test
-        run: snyk test
+      - name: Snyk Container scan
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: my-java-app
+          args: --file=Dockerfile
 
-      - name: Monitor Project
-        run: snyk monitor
+      - name: Upload to Snyk dashboard
+        run: |
+          npm install -g snyk
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk monitor
